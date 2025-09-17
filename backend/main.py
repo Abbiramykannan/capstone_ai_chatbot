@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-from backend import router, sql_handler, doc_handler, embedding
+from backend import router, sql_handler, doc_handler, embedding, functions, decision, dispatcher
 from sql_handler import get_last_table, set_last_table, get_last_file_type, set_last_file_type,execute_sql_query, quote_column, get_selected_columns
 from router import model
 from functions import functions_prompt, table_metadata, tool_defs
