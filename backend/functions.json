@@ -1,0 +1,165 @@
+{
+    "prompt": "You are an intelligent AI assistant for an e-commerce platform’s support chatbot. Always call one of the provided functions based on the user's query. Do NOT return SQL directly. Use ONLY the function_call format. Your role is to help users get relevant information about their orders or policies and also answer needs to be user friendly. Based on the user's question, decide which function to use: Use 'get_order_details' if the question relates to customer orders, purchases, shipments, sales, or any product-related data. Include SUM, AVG, COUNT, etc. in 'columns' if asked for totals. Never return raw SQL.Use 'get_policy_info' if the question is about return policies, shipping terms, refunds, warranty, file/document upload limits, acceptable file formats, account guidelines, or other service-related rules typically found in help or FAQ documents. Use 'handle_unknown_query' when the user's intent is unclear, unrelated, or cannot be confidently mapped to the above two categories. You will also receive a list of available data columns and table name (extracted from uploaded order files). Use this to decide whether an order-related query can be answered. Ensure responses are relevant, safe, and appropriate to the user's context. Return a JSON object with the following structure: {\"function_call\": {\"name\": \"<function_name>\", \"arguments\": <function_arguments_object> }} Where: \"name\" is one of 'get_order_details', 'get_policy_info', or 'handle_unknown_query'. \"arguments\" matches the parameters of the selected function. If the query is ambiguous, invalid, or unauthorized, return: {\"function_call\": {\"name\":\"get_static_response\", \"arguments\": {\"intent\": \"<error_intent>\"}}} with an appropriate error intent (e.g., 'error_invalid_query', 'error_unauthorized', 'error_ambiguous_employee'). If the query includes specific values (like Order ID or Product Name), include a proper 'whereClause' to filter results using relevant columns.",
+    "User Query": "What is the Total Price and Sale Date from Sales_Details?",
+     "table_metadata": {
+  "tables": [
+    {
+      "Name": "Sales_Details",
+      "Columns": [
+        { "Name": "Order ID", "Type": "string", "Description": "Unique identifier for each sales order." },
+        { "Name": "Customer Name", "Type": "string", "Description": "Full name of the customer who made the purchase." },
+        { "Name": "Product Name", "Type": "string", "Description": "Name of the product sold in the order." },
+        { "Name": "Category", "Type": "string", "Description": "Category or type of the product (e.g., Electronics, Clothing)." },
+        { "Name": "Quantity", "Type": "int", "Description": "Number of units purchased for this order line." },
+        { "Name": "Unit Price", "Type": "int", "Description": "Price of a single unit of the product." },
+        { "Name": "Total Price", "Type": "int", "Description": "Total order value (Quantity × Unit Price)." },
+        { "Name": "Sale Date", "Type": "datetime", "Description": "Date and time when the sale occurred (format YYYY-MM-DD)." },
+        { "Name": "Payment Method", "Type": "string", "Description": "Method used for payment (e.g., Credit Card, Cash, PayPal)." },
+        { "Name": "Country", "Type": "string", "Description": "Country where the sale was made." }
+      ]
+    },
+    {
+      "Name": "Order_Details",
+      "Columns": [
+        { "Name": "Order ID", "Type": "string", "Description": "Reference to the sales order this detail belongs to." },
+        { "Name": "Product ID", "Type": "string", "Description": "Unique identifier for the product." },
+        { "Name": "Product Name", "Type": "string", "Description": "Name of the product ordered." },
+        { "Name": "Quantity", "Type": "int", "Description": "Number of units of this product in the order." },
+        { "Name": "Warehouse", "Type": "string", "Description": "Warehouse location from where the product was shipped." },
+        { "Name": "Shipping Status", "Type": "string", "Description": "Current shipping status (e.g., Pending, Shipped, Delivered)." },
+        { "Name": "Delivery Date", "Type": "datetime", "Description": "Date when the product was delivered (format YYYY-MM-DD)." },
+        { "Name": "Courier", "Type": "string", "Description": "Name of the courier company handling delivery." },
+        { "Name": "Tracking ID", "Type": "string", "Description": "Tracking identifier provided by the courier." }
+      ]
+    },
+    {
+      "Name": "Product_Catalog",
+      "Columns": [
+        { "Name": "Product ID", "Type": "string", "Description": "Unique product identifier." },
+        { "Name": "Product Name", "Type": "string", "Description": "Official name of the product." },
+        { "Name": "Category", "Type": "string", "Description": "Product category or classification." },
+        { "Name": "Unit Price", "Type": "int", "Description": "Standard price of the product per unit." },
+        { "Name": "Stock Available", "Type": "int", "Description": "Number of units currently available in stock." },
+        { "Name": "Rating", "Type": "float", "Description": "Average customer rating for the product (e.g., 4.5)." }
+      ]
+    },
+    {
+      "Name": "Customer_Info",
+      "Columns": [
+        { "Name": "Customer ID", "Type": "string", "Description": "Unique identifier for the customer." },
+        { "Name": "Customer Name", "Type": "string", "Description": "Full name of the customer." },
+        { "Name": "Email", "Type": "string", "Description": "Email address of the customer." },
+        { "Name": "Phone", "Type": "int", "Description": "Customer phone number." },
+        { "Name": "Country", "Type": "string", "Description": "Country of the customer." },
+        { "Name": "Join Date", "Type": "datetime", "Description": "Date when the customer registered/joined (format YYYY-MM-DD)." }
+      ]
+    },
+    {
+      "Name": "Payment_Transactions",
+      "Columns": [
+        { "Name": "Transaction ID", "Type": "string", "Description": "Unique identifier for the payment transaction." },
+        { "Name": "Order ID", "Type": "string", "Description": "Reference to the related sales order." },
+        { "Name": "Payment Method", "Type": "string", "Description": "Mode of payment used (e.g., Card, UPI, Cash)." },
+        { "Name": "Amount", "Type": "int", "Description": "Transaction amount." },
+        { "Name": "Status", "Type": "string", "Description": "Payment status (e.g., Success, Failed, Pending)." },
+        { "Name": "Transaction Date", "Type": "datetime", "Description": "Date and time of the transaction (format YYYY-MM-DD)." }
+      ]
+    }
+  ]
+}
+,
+    
+    
+
+     "functions":[
+      {
+  "name": "get_order_details",
+  "description": "Fetch order information such as sales, shipping, status, and customer-related queries using available tabular data. Supports filtering, aggregation, grouping, and distinct queries.",
+  "parameters": {
+    "type": "OBJECT",
+    "properties": {
+      "table_name": {
+        "type": "STRING",
+        "description": "Required table name."
+      },
+      "columns": {
+        "type": "ARRAY",
+        "description": "Column(s) to retrieve from the table.",
+        "items": {
+          "type": "STRING"
+        }
+      },
+      "whereClause": {
+        "type": "OBJECT",
+        "description": "Optional filters to apply. Keys should be column names and values should be the filter values."
+      },
+      "aggregations": {
+        "type": "ARRAY",
+        "description": "Optional aggregation operations like SUM, AVG, COUNT, MIN, MAX.",
+        "items": {
+          "type": "OBJECT",
+          "properties": {
+            "operation": {
+              "type": "STRING",
+              "enum": ["SUM", "AVG", "COUNT", "MIN", "MAX"],
+              "description": "Aggregation function to apply."
+            },
+            "column": {
+              "type": "STRING",
+              "description": "The column on which to apply the aggregation."
+            }
+          },
+          "required": ["operation", "column"]
+        }
+      },
+      "group_by": {
+        "type": "ARRAY",
+        "description": "Optional columns to group results by.",
+        "items": {
+          "type": "STRING"
+        }
+      },
+      "distinct": {
+        "type": "BOOLEAN",
+        "description": "If true, only unique rows/values will be returned."
+      }
+    },
+    "required": ["table_name", "columns"]
+  }
+},
+    
+      {
+        "name": "get_policy_info",
+        "description": "Answer customer questions about platform policies such as return, shipping, or refund using uploaded document content.",
+        "parameters": {
+          "type": "OBJECT",
+          "properties": {
+            "query": {
+              "type": "STRING",
+              "description": "Customer's policy-related question."
+            }
+          },
+          "required": ["query"]
+        }
+      },
+
+      {
+        "name": "handle_unknown_query",
+        "description": "Use this function when the user's request cannot be matched with the known capabilities.",
+        "parameters": {
+          "type": "OBJECT",
+          "properties": {
+            "message": {
+              "type": "STRING",
+              "description": "Optional explanation of why this fallback was used."
+            }
+          },
+          "required": []
+        }
+     }
+
+    ] 
+  }
+
+     
+

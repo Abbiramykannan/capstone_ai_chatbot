@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+streamlit
+pandas
+sqlite3
+openpyxl
+python-docx
+PyPDF2
+qdrant-client
+google-generativeai
+tqdm
+python-dotenv
