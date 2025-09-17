@@ -17,6 +17,7 @@ import pandas as pd
 import time
 import io
 import sys
+import uvicorn
 
 
 logging.basicConfig(

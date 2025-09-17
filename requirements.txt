@@ -2,7 +2,6 @@ fastapi
 uvicorn
 streamlit
 pandas
-sqlite3
 openpyxl
 python-docx
 PyPDF2
