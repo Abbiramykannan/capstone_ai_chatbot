@@ -5,7 +5,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 json_path = os.path.join(BASE_DIR, "functions.json")
 
 
-with open("functions.json", "r") as f:
+with open(json_path, "r") as f:
     data = json.load(f)
 
 if isinstance(data, list):
