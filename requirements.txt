@@ -10,3 +10,4 @@ google-generativeai
 tqdm
 python-dotenv
 pymupdf
+python-multipart
