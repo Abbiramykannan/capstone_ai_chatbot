@@ -9,3 +9,4 @@ qdrant-client
 google-generativeai
 tqdm
 python-dotenv
+pymupdf
