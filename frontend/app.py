@@ -1,9 +1,12 @@
-
+import pandas as pd
 import streamlit as st
 import requests
 import json
+import os
 
 st.set_page_config(page_title="AI Chatbot", layout="centered")
+
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8001")
 
 def safe_json(response):
     try:
@@ -14,7 +17,7 @@ def safe_json(response):
 st.title("AI-Powered Document Chatbot")
 
 if st.button("Reset Data"):
-    response = requests.post("http://localhost:8001/reset")
+    response = requests.post(f"{BACKEND_URL}/reset")
     st.success(response.json().get("message", "Data reset."))
 
 query = st.text_input("Ask a question")
@@ -23,7 +26,7 @@ if st.button("Submit"):
         st.error("Please enter a question before submitting.")
     else:
         with st.spinner("Thinking..."):
-            res = requests.post("http://localhost:8001/query", data={"query": query})
+            res = requests.post(f"{BACKEND_URL}/query", data={"query": query})
             data = safe_json(res)
 
             st.subheader("Query Result:")
@@ -48,7 +51,7 @@ uploaded = st.file_uploader("Choose a file", type=["csv", "pdf", "docx", "xlsx"]
 if uploaded:
     files = {"file": (uploaded.name, uploaded, uploaded.type)}
     with st.spinner("Uploading..."):
-        res = requests.post("http://localhost:8001/upload", files=files)
+        res = requests.post(F"{BACKEND_URL}/upload", files=files)
         data = safe_json(res)
 
         if "message" in data:
