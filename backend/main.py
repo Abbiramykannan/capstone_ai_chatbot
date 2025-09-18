@@ -60,7 +60,7 @@ async def reset_data():
 
 
 
-from dispatcher import FUNCTION_REGISTRY 
+from backend.dispatcher import FUNCTION_REGISTRY 
 
 @app.post("/query")
 async def handle_query(query: str = Form(...)):
