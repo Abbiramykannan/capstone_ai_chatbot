@@ -51,7 +51,7 @@ uploaded = st.file_uploader("Choose a file", type=["csv", "pdf", "docx", "xlsx"]
 if uploaded:
     files = {"file": (uploaded.name, uploaded, uploaded.type)}
     with st.spinner("Uploading..."):
-        res = requests.post(F"{BACKEND_URL}/upload", files=files)
+        res = requests.post(f"{BACKEND_URL}/upload", files=files)
         data = safe_json(res)
 
         if "message" in data:
