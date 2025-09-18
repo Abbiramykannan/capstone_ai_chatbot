@@ -1,13 +1,14 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-# from backend import router, sql_handler, doc_handler, embedding, functions, decision, dispatcher
-from backend.sql_handler import get_last_table, set_last_table, get_last_file_type, set_last_file_type,execute_sql_query, quote_column, get_selected_columns
+from backend import router, sql_handler, doc_handler, embedding, functions, decision, dispatcher
+from backend.sql_handler import get_last_table, set_last_table, get_last_file_type, set_last_file_type,execute_sql_query, quote_column, get_selected_columns, load_csv_to_sqlite
 from backend.router import model
 from backend.functions import functions_prompt, table_metadata, tool_defs
 from backend.embedding import index_document, check_embeddings_exist, extract_text_chunks
 from fastapi.encoders import jsonable_encoder
 from backend.decision import decide_tool_call
 from backend.dispatcher import convert_where_clause, proto_to_dict,dispatch_function
+from backend.doc_handler import extract_docx_text, extract_pdf_text
 import os
 import re
 import logging
@@ -36,7 +37,7 @@ app = FastAPI()
 def startup_event():
     try:
         logging.info("Ensuring Qdrant collection exists...")
-        from embedding import ensure_collection_exists
+        from backend.embedding import ensure_collection_exists
         ensure_collection_exists(vector_size=3072, collection_name="documents")
         logging.info("Qdrant collection ready.")
     except Exception:
@@ -45,7 +46,7 @@ def startup_event():
 @app.post("/reset")
 async def reset_data():
     try:
-        from embedding import client
+        from backend.embedding import client
         client.delete_collection("documents")
 
         db_path = "data.db"
