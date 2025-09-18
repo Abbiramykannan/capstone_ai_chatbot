@@ -1,13 +1,13 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-from backend import router, sql_handler, doc_handler, embedding, functions, decision, dispatcher
-from sql_handler import get_last_table, set_last_table, get_last_file_type, set_last_file_type,execute_sql_query, quote_column, get_selected_columns
-from router import model
-from functions import functions_prompt, table_metadata, tool_defs
-from embedding import index_document, check_embeddings_exist, extract_text_chunks
+# from backend import router, sql_handler, doc_handler, embedding, functions, decision, dispatcher
+from backend.sql_handler import get_last_table, set_last_table, get_last_file_type, set_last_file_type,execute_sql_query, quote_column, get_selected_columns
+from backend.router import model
+from backend.functions import functions_prompt, table_metadata, tool_defs
+from backend.embedding import index_document, check_embeddings_exist, extract_text_chunks
 from fastapi.encoders import jsonable_encoder
-from decision import decide_tool_call
-from dispatcher import convert_where_clause, proto_to_dict,dispatch_function
+from backend.decision import decide_tool_call
+from backend.dispatcher import convert_where_clause, proto_to_dict,dispatch_function
 import os
 import re
 import logging
