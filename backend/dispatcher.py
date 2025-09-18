@@ -1,5 +1,5 @@
-from sql_handler import get_selected_columns
-from embedding import search_similar
+from backend.sql_handler import get_selected_columns
+from backend.embedding import search_similar
 from google.protobuf.json_format import MessageToDict
 import re
 import json

@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from functions import tool_defs, functions_prompt, table_metadata
+from backend.functions import tool_defs, functions_prompt, table_metadata
 from google.generativeai import GenerativeModel
 from dotenv import load_dotenv
 import os
